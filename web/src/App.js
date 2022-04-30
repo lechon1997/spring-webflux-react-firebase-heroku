@@ -1,81 +1,168 @@
-import React from 'react'
+import React, { useState } from "react";
 import {
   BrowserRouter as Router,
   Switch,
   Route,
   Redirect,
-} from 'react-router-dom'
-import firebase from "firebase/app";
-import "firebase/firestore";
-import "firebase/auth";
-import { login, logout } from './actions/authActions';
-
-import { PublicNavbar, PrivateNavbar } from './components/Navbar'
-import HomePage from './pages/HomePage'
-import SingleQuestionPage from './pages/SingleQuestionPage'
-import QuestionsPage from './pages/QuestionsPage'
-import QuestionFormPage from './pages/QuestionFormPage'
-import AnswerFormPage from './pages/AnswerFormPage'
-import OwnerQuestionsPage from './pages/OwnerQuestionsPage'
+} from "react-router-dom";
+import firebaseApp from "./firebase/config";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 
-firebase.initializeApp({
-  apiKey: "AIzaSyCTySyvuIDPg7RWF6ceuuwC2t3BEiAK38o",
-  authDomain: "question-app-demo.firebaseapp.com",
-  projectId: "question-app-demo",
-  storageBucket: "question-app-demo.appspot.com",
-  messagingSenderId: "1038673531562",
-  appId: "1:1038673531562:web:da90421f639a3115dcf6d3"
-});
+import { login, logout } from "./actions/authActions";
+import { PublicNavbar, PrivateNavbar } from "./components/Navbar";
+import { Alert } from "reactstrap";
+import HomePage from "./pages/HomePage";
+import SingleQuestionPage from "./pages/SingleQuestionPage";
+import QuestionsPage from "./pages/QuestionsPage";
+import QuestionFormPage from "./pages/QuestionFormPage";
+import AnswerFormPage from "./pages/AnswerFormPage";
+import OwnerQuestionsPage from "./pages/OwnerQuestionsPage";
+import ProfilePage from "./pages/ProfilePage";
+import Registrarse from "./components/Registrarse";
+import { Link } from "react-router-dom";
 
-const auth = firebase.auth();
+const auth = getAuth(firebaseApp);
 
 const App = ({ dispatch }) => {
+  const [invalidUser, setInvalidUser] = useState(false);
+  const [invalidPass, setInvalidPass] = useState(false);
+
   const [user] = useAuthState(auth);
-  if(user){
-    dispatch(login(user.email, user.uid))
+  if (user) {
+    dispatch(login(user.email, user.uid));
   }
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+    console.log(email);
+    console.log(password);
+    if (password.length < 6) {
+      setInvalidUser(false);
+      setInvalidPass(true);
+      return false;
+    } else {
+      setInvalidPass(false);
+    }
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (e) {
+      setInvalidUser(true);
+    }
+  };
+
   return (
     <Router>
-      {user ?
+      {user ? (
         <>
           <PrivateNavbar />
           <Switch>
-            <Route exact path="/" component={() => {
-              return <HomePage><SignOut dispatch={dispatch} /></HomePage>
-            }} />
+            <Route
+              exact
+              path="/"
+              component={() => {
+                return (
+                  <HomePage>
+                    <SignOut dispatch={dispatch} />
+                  </HomePage>
+                );
+              }}
+            />
             <Route exact path="/questions" component={QuestionsPage} />
             <Route exact path="/question/:id" component={SingleQuestionPage} />
             <Route exact path="/list" component={OwnerQuestionsPage} />
             <Route exact path="/answer/:id" component={AnswerFormPage} />
             <Route exact path="/new" component={QuestionFormPage} />
-            <Redirect to="/" />
-          </Switch>
-        </> :
-        <>
-          <PublicNavbar />
-          <Switch>
-            <Route exact path="/" component={() => {
-              return <HomePage><SignIn dispatch={dispatch} /></HomePage>
-            }} />
-            <Route exact path="/questions" component={QuestionsPage} />
-            <Route exact path="/question/:id" component={SingleQuestionPage} />
-            <Route exact path="/answer/:id" component={AnswerFormPage} />
+            <Route exact path="/profile" component={ProfilePage} />
             <Redirect to="/" />
           </Switch>
         </>
-      }
-    </Router>
-  )
-}
+      ) : (
+        <>
+          <PublicNavbar />
+          <Switch>
+            <Route
+              exact
+              path="/"
+              component={() => {
+                return (
+                  <HomePage>
+                    <form
+                      onSubmit={submitHandler}
+                      className="d-flex flex-column"
+                    >
+                      <input
+                        type="email"
+                        name="email"
+                        className="w-50"
+                        placeholder="Usuario"
+                        id="exampleInputEmail1"
+                        aria-describedby="emailHelp"
+                      />
 
+                      <input
+                        type="password"
+                        name="password"
+                        className="w-50"
+                        placeholder="Contraseña"
+                        id="exampleInputPassword1"
+                      />
+                      <div className="">
+                        <button type="submit" className="button">
+                          Ingresar
+                        </button>
+                        <Link to="/registrarse">
+                          <button type="button" className="ms-3 button">
+                            Registrarse
+                          </button>
+                        </Link>
+                      </div>
+                      <Alert
+                        className="mt-2"
+                        isOpen={invalidUser}
+                        color="danger"
+                      >
+                        El Usuario ingresado no es válido
+                      </Alert>
+                      <Alert
+                        className="mt-2"
+                        isOpen={invalidPass}
+                        color="danger"
+                      >
+                        La contraseña debe tener más de 6 caracteres
+                      </Alert>
+                    </form>
+                    <SignIn dispatch={dispatch} />
+                  </HomePage>
+                );
+              }}
+            />
+            <Route exact path="/questions" component={QuestionsPage} />
+            <Route exact path="/question/:id" component={SingleQuestionPage} />
+            <Route exact path="/answer/:id" component={AnswerFormPage} />
+            <Route exact path="/registrarse" component={Registrarse} />
+            <Redirect to="/" />
+          </Switch>
+        </>
+      )}
+    </Router>
+  );
+};
 
 function SignIn() {
-  const signInWithGoogle = () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider);
+  const signInWithGooglexd = () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider);
   };
-  return <button className="button right" onClick={signInWithGoogle}>Sign in with google</button>;
+  return (
+    <button className="button mt-3" onClick={signInWithGooglexd}>
+      Sign in with google
+    </button>
+  );
 }
 
 function SignOut({ dispatch }) {
@@ -84,7 +171,7 @@ function SignOut({ dispatch }) {
       <button
         className="button right"
         onClick={() => {
-          dispatch(logout())
+          dispatch(logout());
           auth.signOut();
         }}
       >
@@ -94,5 +181,4 @@ function SignOut({ dispatch }) {
   );
 }
 
-
-export default App
+export default App;
