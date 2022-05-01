@@ -27,11 +27,21 @@ const ProfilePage = ({ nombre, apellido, email, uid, dispatch }) => {
   const [nombreU, setNombreU] = useState(nombre);
   const [apellidoU, setApellidoU] = useState(apellido);
   const [emailU, setEmailU] = useState(email);
-
+  const [alertInformationP, setAlertInformationP] = useState(false);
+  const [alertMail, setAlertMail] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [pass, setPass] = useState("");
   const firestore = getFirestore(firebaseApp);
   const docRef = doc(firestore, `usuarios/${auth.currentUser.uid}`);
+
+  useEffect(() => {
+    setNombreU(nombre);
+    setApellidoU(apellido);
+  }, [nombre, apellido]);
+
+  useEffect(() => {
+    setEmailU(email);
+  }, [email]);
 
   const onChangePass = (e) => {
     setPass(e.target.value);
@@ -41,17 +51,36 @@ const ProfilePage = ({ nombre, apellido, email, uid, dispatch }) => {
     setIsOpen(false);
   };
 
-  const actualizarInfoPersonal = async () => {
-    setDoc(
-      docRef,
-      {
-        nombre: nombreU,
-        apellido: apellidoU,
-      },
-      { merge: true }
-    ).then((e) => {
-      dispatch(actualizarInfoPersonalAction(nombreU, apellidoU));
-    });
+  const ocultarAlertaInfoP = () => {
+    setAlertInformationP(false);
+  };
+
+  const ocultarAlertaEmail = () => {
+    setAlertMail(false);
+  };
+
+  useEffect(() => {
+    setTimeout(ocultarAlertaInfoP, 3000);
+  }, [alertInformationP]);
+
+  useEffect(() => {
+    setTimeout(ocultarAlertaEmail, 3000);
+  }, [alertMail]);
+
+  const actualizarInfoPersonal = () => {
+    if (nombreU !== nombre || apellidoU !== apellido) {
+      setDoc(
+        docRef,
+        {
+          nombre: nombreU,
+          apellido: apellidoU,
+        },
+        { merge: true }
+      ).then((e) => {
+        dispatch(actualizarInfoPersonalAction(nombreU, apellidoU));
+        setAlertInformationP(true);
+      });
+    }
 
     if (emailU !== email) {
       setIsOpen(true);
@@ -64,6 +93,7 @@ const ProfilePage = ({ nombre, apellido, email, uid, dispatch }) => {
       .then(() => {
         // email actualizado
         dispatch(actualizarEmailAction({ email: emailU }));
+        setAlertMail(true);
         console.log("actualizado");
       })
       .catch((error1) => {
@@ -90,7 +120,7 @@ const ProfilePage = ({ nombre, apellido, email, uid, dispatch }) => {
     <div className="w-100 d-flex justify-content-center">
       <main className="w-50 mt-2">
         <div className="mt-3">
-          <label htmlFor="nombre">Nombre</label>
+          <label htmlFor="nombre">Name</label>
           <input
             type="text"
             name="nombre"
@@ -103,7 +133,7 @@ const ProfilePage = ({ nombre, apellido, email, uid, dispatch }) => {
           />
         </div>
         <div className="mt-3">
-          <label>Apellido</label>
+          <label>Last name</label>
           <input
             type="text"
             name="apellido"
@@ -128,8 +158,14 @@ const ProfilePage = ({ nombre, apellido, email, uid, dispatch }) => {
           />
         </div>
         <button type="button" onClick={actualizarInfoPersonal}>
-          Guardar
+          Save
         </button>
+        <Alert className="mt-2" isOpen={alertInformationP} color="success">
+          Updated personal information
+        </Alert>
+        <Alert className="mt-2" isOpen={alertMail} color="success">
+          Mail updated successfully
+        </Alert>
         <Modal className="mt-3" isOpen={isOpen}>
           <ModalHeader>
             <div>
