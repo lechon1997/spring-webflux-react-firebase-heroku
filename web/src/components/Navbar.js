@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import img from "../static/images/discusion.png";
 
 export const PublicNavbar = () => (
-  <nav>
+  <nav className="flex-1 max-height-header">
     <img src={img} className="ms-3" />
     <section>
       <Link to="/">Home</Link>
@@ -13,7 +13,7 @@ export const PublicNavbar = () => (
 );
 
 export const PrivateNavbar = () => (
-  <nav>
+  <nav className="flex-1 max-height-header">
     <img src={img} className="ms-3" />
     <section>
       <Link to="/">Home</Link>

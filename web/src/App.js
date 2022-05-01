@@ -23,6 +23,7 @@ import ProfilePage from "./pages/ProfilePage";
 import Registrarse from "./components/Registrarse";
 import { Link } from "react-router-dom";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
+import Footer from "./components/Footer";
 const auth = getAuth(firebaseApp);
 
 const App = ({ dispatch }) => {
@@ -65,94 +66,108 @@ const App = ({ dispatch }) => {
     <Router>
       {user ? (
         <>
-          <PrivateNavbar />
-          <Switch>
-            <Route
-              exact
-              path="/"
-              component={() => {
-                return (
-                  <HomePage>
-                    <SignOut dispatch={dispatch} />
-                  </HomePage>
-                );
-              }}
-            />
-            <Route exact path="/questions" component={QuestionsPage} />
-            <Route exact path="/question/:id" component={SingleQuestionPage} />
-            <Route exact path="/list" component={OwnerQuestionsPage} />
-            <Route exact path="/answer/:id" component={AnswerFormPage} />
-            <Route exact path="/new" component={QuestionFormPage} />
-            <Route exact path="/profile" component={ProfilePage} />
-            <Redirect to="/" />
-          </Switch>
+          <div className="h-100 d-flex flex-column bd-highlight">
+            <PrivateNavbar />
+            <Switch>
+              <Route
+                exact
+                path="/"
+                component={() => {
+                  return (
+                    <HomePage>
+                      <SignOut dispatch={dispatch} />
+                    </HomePage>
+                  );
+                }}
+              />
+              <Route exact path="/questions" component={QuestionsPage} />
+              <Route
+                exact
+                path="/question/:id"
+                component={SingleQuestionPage}
+              />
+              <Route exact path="/list" component={OwnerQuestionsPage} />
+              <Route exact path="/answer/:id" component={AnswerFormPage} />
+              <Route exact path="/new" component={QuestionFormPage} />
+              <Route exact path="/profile" component={ProfilePage} />
+              <Redirect to="/" />
+            </Switch>
+            <Footer />
+          </div>
         </>
       ) : (
         <>
-          <PublicNavbar />
-          <Switch>
-            <Route
-              exact
-              path="/"
-              component={() => {
-                return (
-                  <HomePage>
-                    <form
-                      onSubmit={submitHandler}
-                      className="d-flex flex-column"
-                    >
-                      <input
-                        type="email"
-                        name="email"
-                        className="w-50"
-                        placeholder="Usuario"
-                        id="exampleInputEmail1"
-                        aria-describedby="emailHelp"
-                      />
+          <div className="h-100 d-flex flex-column bd-highlight">
+            <PublicNavbar />
+            <Switch>
+              <Route
+                exact
+                path="/"
+                component={() => {
+                  return (
+                    <HomePage>
+                      <form
+                        onSubmit={submitHandler}
+                        className="d-flex flex-column"
+                      >
+                        <input
+                          type="email"
+                          name="email"
+                          className="w-100"
+                          placeholder="Usuario"
+                          id="exampleInputEmail1"
+                          aria-describedby="emailHelp"
+                        />
 
-                      <input
-                        type="password"
-                        name="password"
-                        className="w-50"
-                        placeholder="Contraseña"
-                        id="exampleInputPassword1"
-                      />
-                      <div className="">
-                        <button type="submit" className="button">
-                          Ingresar
-                        </button>
-                        <Link to="/registrarse">
-                          <button type="button" className="ms-3 button">
-                            Registrarse
+                        <input
+                          type="password"
+                          name="password"
+                          className="w-100"
+                          placeholder="Contraseña"
+                          id="exampleInputPassword1"
+                        />
+                        <div className="">
+                          <button type="submit" className="button">
+                            Ingresar
                           </button>
-                        </Link>
-                      </div>
-                      <Alert
-                        className="mt-2"
-                        isOpen={invalidUser}
-                        color="danger"
-                      >
-                        El Usuario ingresado no es válido
-                      </Alert>
-                      <Alert
-                        className="mt-2"
-                        isOpen={invalidPass}
-                        color="danger"
-                      >
-                        La contraseña debe tener más de 6 caracteres
-                      </Alert>
-                    </form>
-                    <SignIn dispatch={dispatch} />
-                  </HomePage>
-                );
-              }}
-            />
-            <Route exact path="/questions" component={QuestionsPage} />
-            <Route exact path="/question/:id" component={SingleQuestionPage} />
-            <Route exact path="/answer/:id" component={AnswerFormPage} />
-            <Route exact path="/registrarse" component={Registrarse} />
-            <Redirect to="/" />
-          </Switch>
+                          <Link to="/registrarse">
+                            <button type="button" className="ms-3 button">
+                              Registrarse
+                            </button>
+                          </Link>
+                        </div>
+                        <Alert
+                          className="mt-2"
+                          isOpen={invalidUser}
+                          color="danger"
+                        >
+                          El Usuario ingresado no es válido
+                        </Alert>
+                        <Alert
+                          className="mt-2"
+                          isOpen={invalidPass}
+                          color="danger"
+                        >
+                          La contraseña debe tener más de 6 caracteres
+                        </Alert>
+                      </form>
+                      <SignIn dispatch={dispatch} />
+                    </HomePage>
+                  );
+                }}
+              />
+              <Route exact path="/questions" component={QuestionsPage} />
+              <Route
+                exact
+                path="/question/:id"
+                component={SingleQuestionPage}
+              />
+              <Route exact path="/answer/:id" component={AnswerFormPage} />
+              <Route exact path="/registrarse" component={Registrarse} />
+              <Redirect to="/" />
+            </Switch>
+            <Footer />
+          </div>
         </>
       )}
     </Router>

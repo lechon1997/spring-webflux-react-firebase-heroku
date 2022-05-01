@@ -1,7 +1,8 @@
-import React from 'react'
+import React from "react";
+import ReactHtmlParse from "react-html-parser";
 
 export const Answer = ({ answer }) => (
   <aside className="answer">
-    <p>{answer.answer}</p>
+    <p>{ReactHtmlParse(answer.answer)}</p>
   </aside>
-)
+);
