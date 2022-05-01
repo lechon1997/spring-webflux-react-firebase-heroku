@@ -34,7 +34,9 @@ const App = ({ dispatch }) => {
   if (user) {
     const docRef = doc(firestore, `usuarios/${auth.currentUser.uid}`);
     getDoc(docRef).then((p) => {
-      dispatch(login(p.data().nombre, p.data().apellido, user.email, user.uid));
+      dispatch(
+        login(p.data()?.nombre, p.data()?.apellido, user.email, user.uid)
+      );
     });
   }
 
