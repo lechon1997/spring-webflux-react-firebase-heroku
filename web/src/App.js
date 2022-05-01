@@ -22,16 +22,20 @@ import OwnerQuestionsPage from "./pages/OwnerQuestionsPage";
 import ProfilePage from "./pages/ProfilePage";
 import Registrarse from "./components/Registrarse";
 import { Link } from "react-router-dom";
-
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 const auth = getAuth(firebaseApp);
 
 const App = ({ dispatch }) => {
   const [invalidUser, setInvalidUser] = useState(false);
   const [invalidPass, setInvalidPass] = useState(false);
-
+  const firestore = getFirestore(firebaseApp);
   const [user] = useAuthState(auth);
+
   if (user) {
-    dispatch(login(user.email, user.uid));
+    const docRef = doc(firestore, `usuarios/${auth.currentUser.uid}`);
+    getDoc(docRef).then((p) => {
+      dispatch(login(p.data().nombre, p.data().apellido, user.email, user.uid));
+    });
   }
 
   const submitHandler = async (e) => {
